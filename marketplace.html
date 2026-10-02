@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Marketplace — SPARR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;600;700&family=Barlow+Condensed:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+:root{--orange:#f5951a;--red:#ab2e2e;--dark:#0d0d0d;--dark2:#161616;--dark3:#1f1f1f;--card:#181818;--card2:#1e1e1e;--border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.14);--text:#f0f0f0;--muted:rgba(240,240,240,.45);--muted2:rgba(240,240,240,.25);--grad:linear-gradient(135deg,#f5951a,#ab2e2e);--success:#22c55e;--error:#ef4444;--warning:#eab308;--info:#3b82f6;}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
+body{font-family:'Barlow',sans-serif;background:#0d0d0d;color:#f0f0f0;overflow-x:hidden;cursor:none;min-height:100vh;}
+.s-cursor{width:10px;height:10px;border-radius:50%;background:#f5951a;position:fixed;top:0;left:0;pointer-events:none;z-index:99999;mix-blend-mode:screen;transform:translate(-50%,-50%);}
+.s-cursor-ring{width:32px;height:32px;border-radius:50%;border:1.5px solid rgba(245,149,26,.5);position:fixed;top:0;left:0;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");opacity:.4;pointer-events:none;z-index:1;}
+.s-page-loader{position:fixed;inset:0;background:#0d0d0d;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;transition:opacity .5s;}
+.s-page-loader .logo{font-family:'Bebas Neue',sans-serif;font-size:60px;letter-spacing:6px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.s-loader{display:inline-block;width:22px;height:22px;border:2px solid rgba(255,255,255,.1);border-top-color:#f5951a;border-radius:50%;animation:spin .8s linear infinite;}
+.s-loader-sm{width:15px;height:15px;border-width:2px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.s-nav{position:fixed;top:0;left:0;right:0;z-index:200;height:68px;padding:0 48px;display:flex;align-items:center;justify-content:space-between;background:rgba(13,13,13,.82);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid rgba(255,255,255,.08);transition:background .3s;}
+.s-nav.scrolled{background:rgba(13,13,13,.98);}
+.s-logo{font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:4px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-decoration:none;cursor:none;}
+.s-nav-links{display:flex;gap:28px;align-items:center;}
+.s-nav-links a{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(240,240,240,.45);text-decoration:none;transition:color .2s;cursor:none;}
+.s-nav-links a:hover,.s-nav-links a.active{color:#f0f0f0;}
+.s-nav-right{display:flex;gap:10px;align-items:center;}
+.nav-user-avatar{width:36px;height:36px;border-radius:50%;background:var(--grad);border:2px solid rgba(245,149,26,.4);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:13px;color:white;cursor:none;overflow:hidden;text-decoration:none;}
+.nav-user-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.btn{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:11px 28px;border-radius:6px;border:none;cursor:none;transition:all .18s;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap;min-height:44px;}
+.btn-ghost{background:transparent;border:1px solid rgba(245,149,26,.4);color:#f5951a;}
+.btn-ghost:hover{border-color:#f5951a;background:rgba(245,149,26,.08);}
+.btn-fire{background:var(--grad);color:white;box-shadow:0 4px 20px rgba(245,149,26,.18);}
+.btn-fire:hover{box-shadow:0 6px 28px rgba(245,149,26,.32);transform:translateY(-1px);}
+.btn-outline{background:transparent;border:1px solid rgba(255,255,255,.08);color:rgba(240,240,240,.45);}
+.btn-outline:hover{color:#f0f0f0;border-color:rgba(255,255,255,.2);}
+.btn-danger{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#ef4444;}
+.btn-success{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#22c55e;}
+.btn-sm{padding:8px 16px;font-size:12px;min-height:36px;}
+.btn-lg{padding:14px 40px;font-size:15px;min-height:52px;}
+.btn-full{width:100%;}.btn:disabled{opacity:.45;pointer-events:none;}
+.form-group{margin-bottom:18px;}
+.form-label{display:block;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(240,240,240,.45);margin-bottom:7px;}
+.form-input{width:100%;padding:12px 15px;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.08);border-radius:8px;color:#f0f0f0;font-family:'Barlow',sans-serif;font-size:15px;outline:none;transition:border-color .2s;min-height:44px;}
+.form-input:focus{border-color:#f5951a;box-shadow:0 0 0 3px rgba(245,149,26,.12);}
+.form-input::placeholder{color:rgba(240,240,240,.3);}
+.form-select{appearance:none;cursor:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;}
+.form-textarea{resize:vertical;min-height:90px;line-height:1.6;}
+.form-error{font-size:12px;color:#ef4444;margin-top:5px;display:none;}
+.form-error.show{display:block;}
+.form-hint{font-size:12px;color:rgba(240,240,240,.45);margin-top:5px;}
+.s-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);backdrop-filter:blur(12px);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;padding:20px;}
+.s-modal-overlay.open{opacity:1;pointer-events:all;}
+.s-modal{background:#161616;border:1px solid rgba(255,255,255,.08);border-radius:20px;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;transform:translateY(24px) scale(.97);transition:transform .35s cubic-bezier(.4,0,.2,1);box-shadow:0 32px 80px rgba(0,0,0,.7);}
+.s-modal-overlay.open .s-modal{transform:translateY(0) scale(1);}
+.s-modal-lg{max-width:660px;}
+.s-modal-head{padding:22px 28px 18px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#161616;z-index:1;}
+.s-modal-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:#f0f0f0;}
+.s-modal-close{width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,.06);border:none;color:rgba(240,240,240,.45);font-size:17px;cursor:none;transition:all .2s;display:flex;align-items:center;justify-content:center;}
+.s-modal-close:hover{background:rgba(255,255,255,.1);color:#f0f0f0;}
+.s-modal-body{padding:22px 28px 28px;}
+.s-modal-switch{text-align:center;margin-top:14px;font-size:14px;color:rgba(240,240,240,.45);}
+.s-modal-switch a{color:#f5951a;cursor:none;text-decoration:none;font-weight:600;}
+.s-toast-wrap{position:fixed;bottom:28px;right:28px;z-index:9000;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+.s-toast{background:rgba(20,20,20,.97);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.08);border-left:3px solid #f5951a;color:#f0f0f0;padding:12px 16px;border-radius:10px;font-size:14px;max-width:360px;transform:translateX(calc(100% + 44px));opacity:0;transition:transform .38s cubic-bezier(.4,0,.2,1),opacity .38s ease;display:flex;align-items:center;gap:10px;pointer-events:all;box-shadow:0 8px 24px rgba(0,0,0,.45);}
+.s-toast.show{transform:translateX(0);opacity:1;}
+.s-toast.success{border-left-color:#22c55e;}.s-toast.error{border-left-color:#ef4444;}.s-toast.warning{border-left-color:#eab308;}.s-toast.info{border-left-color:#3b82f6;}
+.tag{padding:4px 11px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;background:rgba(245,149,26,.1);color:#f5951a;border:1px solid rgba(245,149,26,.2);display:inline-block;}
+.tag-green{background:rgba(34,197,94,.1);color:#22c55e;border-color:rgba(34,197,94,.2);}
+.tag-gray{background:rgba(255,255,255,.05);color:rgba(240,240,240,.45);border-color:rgba(255,255,255,.08);}
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+.status-dot.online{background:#22c55e;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.5)}}
+.s-avatar{border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;color:white;flex-shrink:0;overflow:hidden;}
+.s-avatar img{width:100%;height:100%;object-fit:cover;}
+.s-avatar-sm{width:32px;height:32px;font-size:12px;}.s-avatar-md{width:44px;height:44px;font-size:16px;}.s-avatar-lg{width:64px;height:64px;font-size:22px;}.s-avatar-xl{width:96px;height:96px;font-size:30px;}
+.s-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:5px;text-transform:uppercase;color:#f5951a;margin-bottom:12px;display:flex;align-items:center;gap:10px;}
+.s-label::before{content:'';display:block;width:18px;height:1.5px;background:#f5951a;}
+.s-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(38px,5vw,70px);line-height:.92;letter-spacing:2px;margin-bottom:18px;color:#f0f0f0;}
+.s-sub{font-size:17px;color:rgba(240,240,240,.45);max-width:560px;line-height:1.7;font-weight:300;}
+.s-divider{height:1px;background:rgba(255,255,255,.08);margin:20px 0;}
+.text-grad{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .65s ease,transform .65s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.reveal-delay-1{transition-delay:.1s;}.reveal-delay-2{transition-delay:.2s;}.reveal-delay-3{transition-delay:.3s;}
+.empty-state{text-align:center;padding:60px 20px;display:flex;flex-direction:column;align-items:center;gap:14px;}
+.empty-state-icon{font-size:48px;opacity:.4;}
+.breadcrumb{display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(240,240,240,.45);flex-wrap:wrap;}
+.breadcrumb a{color:rgba(240,240,240,.45);text-decoration:none;cursor:none;transition:color .2s;}
+.breadcrumb a:hover{color:#f0f0f0;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:#0d0d0d;}::-webkit-scrollbar-thumb{background:#1f1f1f;border-radius:2px;}
+.s-footer{background:#161616;border-top:1px solid rgba(255,255,255,.08);padding:48px 80px 28px;}
+.s-footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;padding-bottom:36px;border-bottom:1px solid rgba(255,255,255,.08);}
+.s-footer-logo{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:4px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:10px;display:block;text-decoration:none;}
+.s-footer-tagline{font-size:14px;color:rgba(240,240,240,.45);line-height:1.7;max-width:260px;}
+.s-footer-col-h{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#f5951a;margin-bottom:14px;}
+.s-footer-links{list-style:none;}
+.s-footer-links li{margin-bottom:8px;}
+.s-footer-links a{font-size:14px;color:rgba(240,240,240,.45);text-decoration:none;cursor:none;transition:color .2s;}
+.s-footer-links a:hover{color:#f0f0f0;}
+.s-footer-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:20px;}
+.s-footer-copy{font-size:13px;color:rgba(240,240,240,.25);}
+@media(max-width:1024px){.s-nav{padding:0 20px;}.s-nav-links{display:none;}.s-footer{padding:36px 24px 24px;}.s-footer-grid{grid-template-columns:1fr 1fr;gap:24px;}}
+@media(max-width:640px){.s-footer-grid{grid-template-columns:1fr;}}
+
+.ph{padding:130px 80px 56px;background:#0d0d0d;position:relative;overflow:hidden;}
+.ph::after{content:'MARKET';position:absolute;right:-40px;top:50%;transform:translateY(-50%);font-family:'Bebas Neue',sans-serif;font-size:18vw;color:rgba(245,149,26,.03);letter-spacing:-10px;pointer-events:none;}
+.mw{max-width:1200px;margin:0 auto;padding:0 80px 100px;}
+.mcat{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,.08);}
+.mg{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:22px;}
+.mc{background:#181818;border:1px solid rgba(255,255,255,.08);border-radius:18px;overflow:hidden;transition:all .35s;cursor:none;display:flex;flex-direction:column;}
+.mc:hover{border-color:rgba(245,149,26,.35);transform:translateY(-7px);box-shadow:0 28px 60px rgba(0,0,0,.5);}
+.mc-img{height:190px;position:relative;overflow:hidden;flex-shrink:0;}
+.mc-img img{width:100%;height:100%;object-fit:cover;}
+.mc-img-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:48px;color:rgba(255,255,255,.22);}
+.mc-img-ph.coaches{background:linear-gradient(135deg,#f5951a,#c07010);}
+.mc-img-ph.camps{background:linear-gradient(135deg,#ab2e2e,#6b1515);}
+.mc-img-ph.sponsors{background:linear-gradient(135deg,#2c5aa0,#1a3460);}
+.mc-img-ph.events{background:linear-gradient(135deg,#2d6a1a,#1a3a0d);}
+.mc-img-ph.other{background:linear-gradient(135deg,#6b356a,#3a1038);}
+.mc-cb{position:absolute;top:12px;left:12px;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:3px 9px;border-radius:4px;}
+.cb-coaches{background:rgba(245,149,26,.2);color:#f5951a;}
+.cb-camps{background:rgba(171,46,46,.2);color:#e06060;}
+.cb-sponsors{background:rgba(44,90,160,.2);color:#7ab0f0;}
+.cb-events{background:rgba(45,106,26,.2);color:#5ecc5e;}
+.cb-other{background:rgba(107,53,106,.2);color:#c090c0;}
+.mc-body{padding:18px;flex:1;display:flex;flex-direction:column;}
+.mc-title{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:#f0f0f0;margin-bottom:5px;}
+.mc-author{font-size:12px;color:rgba(240,240,240,.45);margin-bottom:9px;}
+.mc-desc{font-size:13px;color:rgba(240,240,240,.65);line-height:1.6;margin-bottom:12px;flex:1;}
+.mc-price{font-family:'Bebas Neue',sans-serif;font-size:26px;color:#f5951a;margin-bottom:14px;}
+.mc-foot{display:flex;gap:8px;}
+.mcb{flex:1;padding:8px;border:1px solid rgba(255,255,255,.08);background:transparent;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#f5951a;cursor:none;transition:all .3s;text-decoration:none;display:flex;align-items:center;justify-content:center;}
+.mcb:hover,.mcb.fire{background:#f5951a;color:white;border-color:#f5951a;}
+.srch-row{display:flex;gap:12px;margin-bottom:24px;}
+.sbx{flex:1;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.08);border-radius:10px;padding:10px 16px;transition:border-color .2s;}
+.sbx:focus-within{border-color:rgba(245,149,26,.4);}
+.sbx input{background:transparent;border:none;outline:none;font-family:'Barlow',sans-serif;font-size:15px;color:#f0f0f0;flex:1;cursor:none;}
+.sbx input::placeholder{color:rgba(240,240,240,.3);}
+.img-upload-area{border:2px dashed rgba(255,255,255,.08);border-radius:12px;padding:28px;text-align:center;cursor:none;transition:all .3s;}
+.img-upload-area:hover{border-color:#f5951a;background:rgba(245,149,26,.04);}
+.img-upload-area.has-img{padding:0;border-style:solid;}
+.img-upload-area img{width:100%;height:180px;object-fit:cover;border-radius:10px;display:block;}
+@media(max-width:1024px){.ph,.mw{padding-left:24px;padding-right:24px;}}
+@media(max-width:640px){.mg{grid-template-columns:1fr;}}
+
+</style>
+</head>
+<body>
+<div id="sPageLoader" class="s-page-loader"><div class="logo">SPARR</div><div class="s-loader"></div></div>
+<div class="s-cursor" id="sCursor"></div>
+<div class="s-cursor-ring" id="sCursorRing"></div>
+<div class="s-toast-wrap" id="toastWrap"></div>
+<nav class="s-nav" id="mainNav">
+  <a class="s-logo" href="index.html">SPARR</a>
+  <div class="s-nav-links"><a href="index.html">Home</a><a href="profiles.html">Fighters</a><a href="marketplace.html" class="active">Marketplace</a></div>
+  <div class="s-nav-right" id="navRight"><button class="btn btn-ghost btn-sm" onclick="openModal('loginM')">Log In</button><button class="btn btn-fire btn-sm" onclick="openModal('registerM')">Join SPARR</button></div>
+</nav>
+<div class="ph"><div class="s-label reveal">Marketplace</div><h1 class="s-title reveal">Coaches, Camps & More</h1><p class="s-sub reveal">Trenéři, kempy, sponzoři a eventy.</p></div>
+<div class="mw">
+  <div class="srch-row"><div class="sbx"><span style="color:rgba(240,240,240,.3);font-size:17px">🔍</span><input type="text" id="mq" placeholder="Hledat…" oninput="applyM()"></div><button class="btn btn-fire" id="addItemBtn">+ Přidat inzerát</button></div>
+  <div class="mcat">
+    <button class="filter-chip active" onclick="setCat('all',this)">Vše</button>
+    <button class="filter-chip" onclick="setCat('coaches',this)">🥊 Trenéři</button>
+    <button class="filter-chip" onclick="setCat('camps',this)">🏕 Kempy</button>
+    <button class="filter-chip" onclick="setCat('sponsors',this)">🤝 Sponzoři</button>
+    <button class="filter-chip" onclick="setCat('events',this)">🏆 Eventy</button>
+    <button class="filter-chip" onclick="setCat('other',this)">📦 Ostatní</button>
+  </div>
+  <div class="mg" id="mg"><div style="grid-column:1/-1;text-align:center;padding:60px;color:rgba(240,240,240,.45)"><div class="s-loader" style="margin:0 auto 16px"></div>Načítám inzeráty…</div></div>
+</div>
+<footer class="s-footer">
+<div class="s-footer-grid">
+  <div><a href="index.html" class="s-footer-logo">SPARR</a><p class="s-footer-tagline">Czech combat sports platform.</p></div>
+  <div><div class="s-footer-col-h">Platform</div><ul class="s-footer-links"><li><a href="index.html">Home</a></li><li><a href="profiles.html">Fighters</a></li><li><a href="marketplace.html">Marketplace</a></li></ul></div>
+</div>
+<div class="s-footer-bottom"><div class="s-footer-copy">© 2025 SPARR</div></div>
+</footer>
+<!-- LOGIN -->
+<div class="s-modal-overlay" id="loginM" onclick="if(event.target===this)closeModal('loginM')"><div class="s-modal"><div class="s-modal-head"><div class="s-modal-title">Log In</div><button class="s-modal-close" onclick="closeModal('loginM')">✕</button></div><div class="s-modal-body"><div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="liE" placeholder="fighter@sparr.cz"></div><div class="form-group"><label class="form-label">Heslo</label><input type="password" class="form-input" id="liP" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div><div id="liErr" class="form-error"></div><button class="btn btn-fire btn-full" style="padding:14px" onclick="doLogin()">Log In</button><div class="s-modal-switch">Nemáš účet? <a onclick="switchModal('loginM','registerM')">Zaregistruj se</a></div></div></div></div>
+<div class="s-modal-overlay" id="registerM" onclick="if(event.target===this)closeModal('registerM')"><div class="s-modal"><div class="s-modal-head"><div class="s-modal-title">Join SPARR</div><button class="s-modal-close" onclick="closeModal('registerM')">✕</button></div><div class="s-modal-body"><div class="form-group"><label class="form-label">Jméno *</label><input type="text" class="form-input" id="riN" placeholder="Tvoje jméno"></div><div class="form-group"><label class="form-label">Email *</label><input type="email" class="form-input" id="riE" placeholder="fighter@sparr.cz"></div><div class="form-group"><label class="form-label">Město *</label><input type="text" class="form-input" id="riC" placeholder="Praha, Brno…"></div><div class="form-group"><label class="form-label">Heslo *</label><input type="password" class="form-input" id="riP" placeholder="Min. 6 znaků"></div><div id="riErr" class="form-error"></div><button class="btn btn-fire btn-full" style="padding:14px" onclick="doRegister()">Vytvořit profil</button><div class="s-modal-switch">Už máš účet? <a onclick="switchModal('registerM','loginM')">Přihlásit se</a></div></div></div></div>
+<!-- ADD LISTING -->
+<div class="s-modal-overlay" id="addModal" onclick="if(event.target===this)closeModal('addModal')">
+  <div class="s-modal s-modal-lg"><div class="s-modal-head"><div class="s-modal-title">Přidat inzerát</div><button class="s-modal-close" onclick="closeModal('addModal')">✕</button></div>
+  <div class="s-modal-body">
+    <div class="form-group"><label class="form-label">Název *</label><input type="text" class="form-input" id="aTitle" placeholder="Název inzerátu"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="form-group"><label class="form-label">Kategorie *</label><select class="form-input form-select" id="aCat"><option value="coaches">🥊 Trenér / Kouč</option><option value="camps">🏕 Kemp / Program</option><option value="sponsors">🤝 Sponzor</option><option value="events">🏆 Event / Turnaj</option><option value="other">📦 Ostatní</option></select></div>
+      <div class="form-group"><label class="form-label">Cena *</label><input type="text" class="form-input" id="aPrice" placeholder="500 Kč/hod"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Město / Region</label><input type="text" class="form-input" id="aCity" placeholder="Praha, Online…"></div>
+    <div class="form-group"><label class="form-label">Popis *</label><textarea class="form-input form-textarea" id="aDesc" style="min-height:100px" placeholder="Co nabízíš…" maxlength="600"></textarea></div>
+    <div class="form-group"><label class="form-label">Kontaktní email</label><input type="email" class="form-input" id="aEmail" placeholder="tvuj@email.cz"></div>
+    <div class="form-group"><label class="form-label">Fotka (volitelné)</label>
+      <div class="img-upload-area" id="imgArea" onclick="document.getElementById('aImg').click()"><div style="font-size:32px;opacity:.4;margin-bottom:8px">📷</div><div style="font-size:14px;color:rgba(240,240,240,.45)">Klikni pro výběr fotky</div></div>
+      <input type="file" id="aImg" accept="image/*" style="display:none" onchange="previewImg(event)">
+    </div>
+    <div id="addErr" class="form-error"></div>
+    <button class="btn btn-fire btn-full" style="padding:14px" id="addBtn" onclick="doAddItem()">Publikovat inzerát</button>
+  </div></div>
+</div>
+<!-- CONTACT -->
+<div class="s-modal-overlay" id="contactModal" onclick="if(event.target===this)closeModal('contactModal')">
+  <div class="s-modal"><div class="s-modal-head"><div class="s-modal-title">Kontaktovat</div><button class="s-modal-close" onclick="closeModal('contactModal')">✕</button></div>
+  <div class="s-modal-body">
+    <div style="padding:13px;background:rgba(245,149,26,.07);border:1px solid rgba(245,149,26,.2);border-radius:10px;margin-bottom:18px;font-size:14px;color:#f0f0f0" id="cItemTitle">—</div>
+    <div class="form-group"><label class="form-label">Tvoje jméno *</label><input type="text" class="form-input" id="cName" placeholder="Jméno"></div>
+    <div class="form-group"><label class="form-label">Tvůj email *</label><input type="email" class="form-input" id="cEmail" placeholder="tvuj@email.cz"></div>
+    <div class="form-group"><label class="form-label">Zpráva *</label><textarea class="form-input form-textarea" id="cMsg" placeholder="Napiš co tě zajímá…" style="min-height:100px"></textarea></div>
+    <div id="cErr" class="form-error"></div>
+    <button class="btn btn-fire btn-full" style="padding:14px" id="cBtn" onclick="doContact()">Odeslat zprávu</button>
+  </div></div>
+</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail, updatePassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, query, where, orderBy, limit, updateDoc, arrayUnion, arrayRemove, deleteDoc, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+const _app = initializeApp({apiKey:"AIzaSyAhU5DPvVC88jeuQyKrA1jdyRsx3ub8wBY",authDomain:"sparr-ae946.firebaseapp.com",projectId:"sparr-ae946",storageBucket:"sparr-ae946.firebasestorage.app",messagingSenderId:"463453691804",appId:"1:463453691804:web:66854c39094693669f7259"});
+const auth = getAuth(_app);
+const db   = getFirestore(_app);
+const storage = getStorage(_app);
+const APP_URL = "https://jankebrle-star.github.io/SPARR_web_v5";
+// ── Helpers ──────────────────────────────────────────────
+function ini(n=""){return(n||"").trim().split(/\s+/).map(x=>x[0]||"").join("").slice(0,2).toUpperCase()||"?";}
+function esc(t=""){return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/\n/g,"<br>");}
+function ago(ts){if(!ts)return"—";const d=Date.now()-ts;if(d<60000)return"právě teď";if(d<3600000)return Math.floor(d/60000)+"m";if(d<86400000)return Math.floor(d/3600000)+"h";return Math.floor(d/86400000)+"d";}
+function getP(uid){return getDoc(doc(db,"fighters",uid)).then(s=>s.exists()?{id:s.id,...s.data()}:null).catch(()=>null);}
+function saveP(uid,d){return setDoc(doc(db,"fighters",uid),d,{merge:true});}
+function sendEmail(tpl,p){try{if(window.emailjs)window.emailjs.send("service_ytrykjs",tpl,p).catch(e=>console.warn("email:",e?.text||e));}catch{}}
+
+// ── UI init ───────────────────────────────────────────────
+function removePL(){const pl=document.getElementById("sPageLoader");if(pl){pl.style.opacity="0";setTimeout(()=>pl.remove(),500);}}
+if(document.readyState==="complete")removePL();else window.addEventListener("load",removePL);
+setTimeout(removePL,3000);
+
+window.addEventListener("load",()=>{if(window.emailjs)window.emailjs.init("HAijP0Nkt2ktswUcA");});
+
+window.showToast=function(msg,type){type=type||"info";var w=document.getElementById("toastWrap");if(!w)return;var ic={success:"✅",error:"❌",info:"ℹ️",warning:"⚠️"};var t=document.createElement("div");t.className="s-toast "+type;t.innerHTML="<span>"+ic[type]+"</span><span style=\"flex:1\">"+msg+"</span><button style=\"background:none;border:none;color:rgba(240,240,240,.4);cursor:none;font-size:16px;padding:0 4px;margin-left:6px\" onclick=\"this.parentElement.classList.remove('show');setTimeout(()=>this.parentElement.remove(),420)\">✕</button>";w.appendChild(t);requestAnimationFrame(()=>requestAnimationFrame(()=>t.classList.add("show")));setTimeout(()=>{t.classList.remove("show");setTimeout(()=>{if(t.parentElement)t.remove();},420);},5000);};
+
+window.openModal=id=>{const m=document.getElementById(id);if(m){m.classList.add("open");document.body.style.overflow="hidden";}};
+window.closeModal=id=>{const m=document.getElementById(id);if(m){m.classList.remove("open");document.body.style.overflow="";}};
+window.switchModal=(a,b)=>{closeModal(a);setTimeout(()=>openModal(b),300);};
+document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll(".s-modal-overlay.open").forEach(m=>m.classList.remove("open"));});
+
+const cur=document.getElementById("sCursor"),ring=document.getElementById("sCursorRing");
+if(cur&&ring){let mx=0,my=0,rx=0,ry=0;document.addEventListener("mousemove",e=>{mx=e.clientX;my=e.clientY;cur.style.transform=`translate(${mx}px,${my}px)`;});(function a(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.transform=`translate(${rx}px,${ry}px)`;requestAnimationFrame(a);})();}
+
+const nav=document.getElementById("mainNav");if(nav)window.addEventListener("scroll",()=>nav.classList.toggle("scrolled",scrollY>50));
+const ro=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add("visible");}),{threshold:.08});
+document.querySelectorAll(".reveal").forEach(el=>ro.observe(el));
+// ── Auth nav ──────────────────────────────────────────────
+function buildNav(user, profile) {
+  const right = document.getElementById("navRight");
+  if (!right) return;
+  if (user) {
+    const av = profile?.photoURL ? `<img src="${profile.photoURL}" alt="">` : ini(profile?.name||"?");
+    right.innerHTML = `<a href="messages.html" class="btn btn-outline btn-sm">💬 Zprávy</a><a href="my-profile.html" class="nav-user-avatar">${av}</a><button class="btn btn-outline btn-sm" id="_lob">Odhlásit</button>`;
+    document.getElementById("_lob").addEventListener("click", ()=>signOut(auth).then(()=>location.href="index.html"));
+  } else {
+    right.innerHTML = `<button class="btn btn-ghost btn-sm" onclick="openModal('loginModal')">Log In</button><button class="btn btn-fire btn-sm" onclick="openModal('registerModal')">Join SPARR</button>`;
+  }
+}
+
+const DEMO_M = [{"id": "d1", "title": "Fitness Coach Jan", "category": "coaches", "authorName": "Jan Nov\u00e1k", "authorEmail": "jan@example.cz", "city": "Praha 5", "desc": "Profesion\u00e1ln\u00ed silov\u00e1 a kondi\u010dn\u00ed p\u0159\u00edprava pro bojovn\u00edky. 8 let zku\u0161enost\u00ed.", "price": "500 K\u010d/hod", "imageUrl": ""}, {"id": "d2", "title": "Nutri\u010dn\u00ed poradenstv\u00ed", "category": "coaches", "authorName": "Marie Svobodov\u00e1", "authorEmail": "marie@example.cz", "city": "Online", "desc": "Pl\u00e1nov\u00e1n\u00ed stravy pro bojovn\u00edky. Individu\u00e1ln\u00ed j\u00eddeln\u00ed\u010dek na m\u00edru.", "price": "400 K\u010d/konzultace", "imageUrl": ""}, {"id": "d3", "title": "Czech Camp Prague 2025", "category": "camps", "authorName": "SPARR Events", "authorEmail": "events@sparr.cz", "city": "Praha", "desc": "Letn\u00ed intenzivn\u00ed kemp MMA a Boxing. Tr\u00e9ninky 2x denn\u011b.", "price": "5 000 K\u010d/t\u00fdden", "imageUrl": ""}, {"id": "d4", "title": "Fight Gear Store", "category": "sponsors", "authorName": "Fight Gear s.r.o.", "authorEmail": "info@fightgear.cz", "city": "Online", "desc": "Bojov\u00e9 vybaven\u00ed \u2014 rukavice, chr\u00e1ni\u010de, kimona. Slevy pro SPARR \u010dleny!", "price": "Slevy a\u017e 40%", "imageUrl": ""}, {"id": "d5", "title": "SPARR Championship 2025", "category": "events", "authorName": "SPARR", "authorEmail": "championship@sparr.cz", "city": "Praha", "desc": "Velk\u00fd turnaj v\u0161ech bojov\u00fdch sport\u016f. Boxing, MMA, BJJ, Kickbox.", "price": "500 K\u010d/startovn\u00e9", "imageUrl": ""}, {"id": "d6", "title": "Open Matt Weekly", "category": "events", "authorName": "Gymbox Praha", "authorEmail": "gymbox@example.cz", "city": "Praha 5", "desc": "Otev\u0159en\u00e9 tr\u00e9ninky ka\u017ed\u00fd \u010dtvrtek 18:00. V\u0161echny sporty a \u00farovn\u011b.", "price": "100 K\u010d/vstupn\u00e9", "imageUrl": ""}];
+let _u=null,_p=null,_all=[],_cat='all',_imgFile=null,_cItem=null;
+
+onAuthStateChanged(auth,async user=>{ _u=user;_p=user?await getP(user.uid):null;buildNav(user,_p);if(user&&_p){document.getElementById('cName').value=_p.name||'';document.getElementById('cEmail').value=_p.email||'';} });
+
+async function loadItems(){
+  try{
+    const s=await getDocs(collection(db,'marketplace'));
+    const real=s.docs.map(d=>{const d2=d.data();return{...d2,id:d.id};});
+    _all=real.length?real:DEMO_M;
+  }catch{_all=DEMO_M;}
+  applyM();
+}
+
+window.applyM=()=>{
+  const q=(document.getElementById('mq').value||'').toLowerCase();
+  let data=_all.filter(it=>(_cat==='all'||it.category===_cat)&&(!q||it.title?.toLowerCase().includes(q)||it.desc?.toLowerCase().includes(q)||it.city?.toLowerCase().includes(q)));
+  data.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  if(!data.length){document.getElementById('mg').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px;color:rgba(240,240,240,.45)">Nic nenalezeno.</div>';return;}
+  const catL={'coaches':'Trenér','camps':'Kemp','sponsors':'Sponzor','events':'Event','other':'Ostatní'};
+  document.getElementById('mg').innerHTML=data.map(it=>`
+    <div class="mc" onclick="location.href='marketplace-item.html?id=${it.id}'">
+      <div class="mc-img">
+        ${it.imageUrl?`<img src="${it.imageUrl}" alt="${esc(it.title)}">`:''}
+        ${!it.imageUrl?`<div class="mc-img-ph ${it.category||'other'}">${(it.title||'').slice(0,4).toUpperCase()}</div>`:''}
+        <div class="mc-cb cb-${it.category||'other'}">${catL[it.category]||'Ostatní'}</div>
+      </div>
+      <div class="mc-body">
+        <div class="mc-title">${esc(it.title)}</div>
+        <div class="mc-author">👤 ${esc(it.authorName)} ${it.city?'· 📍 '+esc(it.city):''}</div>
+        <div class="mc-desc">${esc((it.desc||'').slice(0,130))}${(it.desc||'').length>130?'…':''}</div>
+        <div class="mc-price">${esc(it.price||'Kontaktujte')}</div>
+        <div class="mc-foot" onclick="event.stopPropagation()">
+          <a href="marketplace-item.html?id=${it.id}" class="mcb">Detail</a>
+          <button class="mcb fire" onclick="openContact(${JSON.stringify(it).replace(/"/g,'&quot;')})">Kontaktovat</button>
+        </div>
+      </div>
+    </div>`).join('');
+};
+
+window.setCat=(cat,btn)=>{_cat=cat;document.querySelectorAll('.filter-chip,.mcat button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');applyM();};
+
+window.openContact=item=>{_cItem=item;document.getElementById('cItemTitle').textContent=item.title;openModal('contactModal');};
+
+window.doContact=async()=>{
+  const name=document.getElementById('cName').value.trim(),email=document.getElementById('cEmail').value.trim(),msg=document.getElementById('cMsg').value.trim();
+  const err=document.getElementById('cErr'),btn=document.getElementById('cBtn');err.classList.remove('show');
+  if(!name||!email||!msg){err.textContent='Vyplň všechna pole.';err.classList.add('show');return;}
+  btn.disabled=true;btn.innerHTML='<span class="s-loader s-loader-sm"></span> Odesílám…';
+  try{
+    if(_cItem.uid){
+      updateDoc(doc(db,'marketplace',_cItem.id),{contacts:increment(1)}).catch(()=>{});
+      updateDoc(doc(db,'fighters',_cItem.uid),{notifications:arrayUnion({type:'contact',fromName:name,text:`${name} tě kontaktoval/a ohledně "${_cItem.title}"`,link:`marketplace-item.html?id=${_cItem.id}`,ts:Date.now(),read:false,id:`${Date.now()}`})}).catch(()=>{});
+    }
+    if(_cItem.authorEmail){
+      await sendEmail('Auto-Reply',{to_name:_cItem.authorName,to_email:_cItem.authorEmail,from_name:name,message:`[Marketplace: ${_cItem.title}]\n\nOd: ${name} (${email})\n\n${msg}`,app_url:APP_URL});
+    }
+    closeModal('contactModal');document.getElementById('cMsg').value='';
+    showToast(`Zpráva odeslána! Čekej na odpověď na ${email}.`,'success');
+  }catch(e){showToast('Odeslání selhalo: '+e.message,'error');}
+  btn.disabled=false;btn.textContent='Odeslat zprávu';
+};
+
+document.getElementById('addItemBtn').addEventListener('click',()=>{if(_u)openModal('addModal');else openModal('loginM');});
+window.previewImg=e=>{_imgFile=e.target.files[0];if(!_imgFile)return;const url=URL.createObjectURL(_imgFile);const a=document.getElementById('imgArea');a.innerHTML=`<img src="${url}" alt="">`;a.classList.add('has-img');};
+
+window.doAddItem=async()=>{
+  const title=document.getElementById('aTitle').value.trim(),desc=document.getElementById('aDesc').value.trim(),price=document.getElementById('aPrice').value.trim();
+  const err=document.getElementById('addErr'),btn=document.getElementById('addBtn');err.classList.remove('show');
+  if(!title||!desc||!price){err.textContent='Vyplň název, popis a cenu.';err.classList.add('show');return;}
+  btn.disabled=true;btn.innerHTML='<span class="s-loader s-loader-sm"></span>';
+  try{
+    let imageUrl='';
+    if(_imgFile){const r=ref(storage,`marketplace/${_u.uid}_${Date.now()}`);await uploadBytes(r,_imgFile);imageUrl=await getDownloadURL(r);}
+    await addDoc(collection(db,'marketplace'),{uid:_u.uid,authorName:_p?.name||'SPARR User',authorEmail:document.getElementById('aEmail').value.trim(),title,category:document.getElementById('aCat').value,price,city:document.getElementById('aCity').value.trim(),desc,imageUrl,views:0,contacts:0,createdAt:Date.now()});
+    closeModal('addModal');showToast('Inzerát publikován! 🎉','success');_imgFile=null;
+    ['aTitle','aPrice','aCity','aDesc','aEmail'].forEach(id=>document.getElementById(id).value='');
+    await loadItems();
+  }catch(e){showToast('Chyba: '+e.message,'error');}
+  btn.disabled=false;btn.textContent='Publikovat inzerát';
+};
+
+window.doLogin=async()=>{const email=document.getElementById('liE').value.trim(),pass=document.getElementById('liP').value,err=document.getElementById('liErr');err.classList.remove('show');try{await signInWithEmailAndPassword(auth,email,pass);closeModal('loginM');showToast('Přihlášen!','success');setTimeout(()=>location.reload(),400);}catch{err.textContent='Špatné přihlašovací údaje.';err.classList.add('show');} };
+window.doRegister=async()=>{const name=document.getElementById('riN').value.trim(),email=document.getElementById('riE').value.trim(),city=document.getElementById('riC').value.trim(),pass=document.getElementById('riP').value,err=document.getElementById('riErr');err.classList.remove('show');if(!name||!email||!city||!pass){err.textContent='Vyplň povinná pole.';err.classList.add('show');return;}try{const c=await createUserWithEmailAndPassword(auth,email,pass);await updateProfile(c.user,{displayName:name});await saveP(c.user.uid,{uid:c.user.uid,email,name,city,sport:'Boxing',level:'Beginner',yearsActive:0,bio:'',weight:'',instagram:'',secondary:[],openToSpar:true,teachBeginners:false,photoURL:'',points:0,sessions:0,wins:0,savedPosts:[],followers:[],following:[],notifications:[],createdAt:Date.now()});sendEmail('Welcome',{to_name:name,to_email:email,app_url:APP_URL});closeModal('registerM');showToast(`Vítej, ${name}!`,'success');setTimeout(()=>location.href='my-profile.html',1200);}catch(e){err.textContent=e.code==='auth/email-already-in-use'?'Email je již zaregistrován.':'Chyba.';err.classList.add('show');} };
+
+loadItems();
+</script>
+</body></html>

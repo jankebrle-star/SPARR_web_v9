@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Zprávy — SPARR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;600;700&family=Barlow+Condensed:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+:root{--orange:#f5951a;--red:#ab2e2e;--dark:#0d0d0d;--dark2:#161616;--dark3:#1f1f1f;--card:#181818;--card2:#1e1e1e;--border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.14);--text:#f0f0f0;--muted:rgba(240,240,240,.45);--muted2:rgba(240,240,240,.25);--grad:linear-gradient(135deg,#f5951a,#ab2e2e);--success:#22c55e;--error:#ef4444;--warning:#eab308;--info:#3b82f6;}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
+body{font-family:'Barlow',sans-serif;background:#0d0d0d;color:#f0f0f0;overflow-x:hidden;cursor:none;min-height:100vh;}
+.s-cursor{width:10px;height:10px;border-radius:50%;background:#f5951a;position:fixed;top:0;left:0;pointer-events:none;z-index:99999;mix-blend-mode:screen;transform:translate(-50%,-50%);}
+.s-cursor-ring{width:32px;height:32px;border-radius:50%;border:1.5px solid rgba(245,149,26,.5);position:fixed;top:0;left:0;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");opacity:.4;pointer-events:none;z-index:1;}
+.s-page-loader{position:fixed;inset:0;background:#0d0d0d;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;transition:opacity .5s;}
+.s-page-loader .logo{font-family:'Bebas Neue',sans-serif;font-size:60px;letter-spacing:6px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.s-loader{display:inline-block;width:22px;height:22px;border:2px solid rgba(255,255,255,.1);border-top-color:#f5951a;border-radius:50%;animation:spin .8s linear infinite;}
+.s-loader-sm{width:15px;height:15px;border-width:2px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.s-nav{position:fixed;top:0;left:0;right:0;z-index:200;height:68px;padding:0 48px;display:flex;align-items:center;justify-content:space-between;background:rgba(13,13,13,.82);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid rgba(255,255,255,.08);transition:background .3s;}
+.s-nav.scrolled{background:rgba(13,13,13,.98);}
+.s-logo{font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:4px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-decoration:none;cursor:none;}
+.s-nav-links{display:flex;gap:28px;align-items:center;}
+.s-nav-links a{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(240,240,240,.45);text-decoration:none;transition:color .2s;cursor:none;}
+.s-nav-links a:hover,.s-nav-links a.active{color:#f0f0f0;}
+.s-nav-right{display:flex;gap:10px;align-items:center;}
+.nav-user-avatar{width:36px;height:36px;border-radius:50%;background:var(--grad);border:2px solid rgba(245,149,26,.4);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:13px;color:white;cursor:none;overflow:hidden;text-decoration:none;}
+.nav-user-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.btn{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:11px 28px;border-radius:6px;border:none;cursor:none;transition:all .18s;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap;min-height:44px;}
+.btn-ghost{background:transparent;border:1px solid rgba(245,149,26,.4);color:#f5951a;}
+.btn-ghost:hover{border-color:#f5951a;background:rgba(245,149,26,.08);}
+.btn-fire{background:var(--grad);color:white;box-shadow:0 4px 20px rgba(245,149,26,.18);}
+.btn-fire:hover{box-shadow:0 6px 28px rgba(245,149,26,.32);transform:translateY(-1px);}
+.btn-outline{background:transparent;border:1px solid rgba(255,255,255,.08);color:rgba(240,240,240,.45);}
+.btn-outline:hover{color:#f0f0f0;border-color:rgba(255,255,255,.2);}
+.btn-danger{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#ef4444;}
+.btn-success{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#22c55e;}
+.btn-sm{padding:8px 16px;font-size:12px;min-height:36px;}
+.btn-lg{padding:14px 40px;font-size:15px;min-height:52px;}
+.btn-full{width:100%;}.btn:disabled{opacity:.45;pointer-events:none;}
+.form-group{margin-bottom:18px;}
+.form-label{display:block;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(240,240,240,.45);margin-bottom:7px;}
+.form-input{width:100%;padding:12px 15px;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.08);border-radius:8px;color:#f0f0f0;font-family:'Barlow',sans-serif;font-size:15px;outline:none;transition:border-color .2s;min-height:44px;}
+.form-input:focus{border-color:#f5951a;box-shadow:0 0 0 3px rgba(245,149,26,.12);}
+.form-input::placeholder{color:rgba(240,240,240,.3);}
+.form-select{appearance:none;cursor:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;}
+.form-textarea{resize:vertical;min-height:90px;line-height:1.6;}
+.form-error{font-size:12px;color:#ef4444;margin-top:5px;display:none;}
+.form-error.show{display:block;}
+.form-hint{font-size:12px;color:rgba(240,240,240,.45);margin-top:5px;}
+.s-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);backdrop-filter:blur(12px);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;padding:20px;}
+.s-modal-overlay.open{opacity:1;pointer-events:all;}
+.s-modal{background:#161616;border:1px solid rgba(255,255,255,.08);border-radius:20px;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;transform:translateY(24px) scale(.97);transition:transform .35s cubic-bezier(.4,0,.2,1);box-shadow:0 32px 80px rgba(0,0,0,.7);}
+.s-modal-overlay.open .s-modal{transform:translateY(0) scale(1);}
+.s-modal-lg{max-width:660px;}
+.s-modal-head{padding:22px 28px 18px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#161616;z-index:1;}
+.s-modal-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:#f0f0f0;}
+.s-modal-close{width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,.06);border:none;color:rgba(240,240,240,.45);font-size:17px;cursor:none;transition:all .2s;display:flex;align-items:center;justify-content:center;}
+.s-modal-close:hover{background:rgba(255,255,255,.1);color:#f0f0f0;}
+.s-modal-body{padding:22px 28px 28px;}
+.s-modal-switch{text-align:center;margin-top:14px;font-size:14px;color:rgba(240,240,240,.45);}
+.s-modal-switch a{color:#f5951a;cursor:none;text-decoration:none;font-weight:600;}
+.s-toast-wrap{position:fixed;bottom:28px;right:28px;z-index:9000;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+.s-toast{background:rgba(20,20,20,.97);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.08);border-left:3px solid #f5951a;color:#f0f0f0;padding:12px 16px;border-radius:10px;font-size:14px;max-width:360px;transform:translateX(calc(100% + 44px));opacity:0;transition:transform .38s cubic-bezier(.4,0,.2,1),opacity .38s ease;display:flex;align-items:center;gap:10px;pointer-events:all;box-shadow:0 8px 24px rgba(0,0,0,.45);}
+.s-toast.show{transform:translateX(0);opacity:1;}
+.s-toast.success{border-left-color:#22c55e;}.s-toast.error{border-left-color:#ef4444;}.s-toast.warning{border-left-color:#eab308;}.s-toast.info{border-left-color:#3b82f6;}
+.tag{padding:4px 11px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;background:rgba(245,149,26,.1);color:#f5951a;border:1px solid rgba(245,149,26,.2);display:inline-block;}
+.tag-green{background:rgba(34,197,94,.1);color:#22c55e;border-color:rgba(34,197,94,.2);}
+.tag-gray{background:rgba(255,255,255,.05);color:rgba(240,240,240,.45);border-color:rgba(255,255,255,.08);}
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+.status-dot.online{background:#22c55e;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.5)}}
+.s-avatar{border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;color:white;flex-shrink:0;overflow:hidden;}
+.s-avatar img{width:100%;height:100%;object-fit:cover;}
+.s-avatar-sm{width:32px;height:32px;font-size:12px;}.s-avatar-md{width:44px;height:44px;font-size:16px;}.s-avatar-lg{width:64px;height:64px;font-size:22px;}.s-avatar-xl{width:96px;height:96px;font-size:30px;}
+.s-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:5px;text-transform:uppercase;color:#f5951a;margin-bottom:12px;display:flex;align-items:center;gap:10px;}
+.s-label::before{content:'';display:block;width:18px;height:1.5px;background:#f5951a;}
+.s-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(38px,5vw,70px);line-height:.92;letter-spacing:2px;margin-bottom:18px;color:#f0f0f0;}
+.s-sub{font-size:17px;color:rgba(240,240,240,.45);max-width:560px;line-height:1.7;font-weight:300;}
+.s-divider{height:1px;background:rgba(255,255,255,.08);margin:20px 0;}
+.text-grad{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .65s ease,transform .65s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.reveal-delay-1{transition-delay:.1s;}.reveal-delay-2{transition-delay:.2s;}.reveal-delay-3{transition-delay:.3s;}
+.empty-state{text-align:center;padding:60px 20px;display:flex;flex-direction:column;align-items:center;gap:14px;}
+.empty-state-icon{font-size:48px;opacity:.4;}
+.breadcrumb{display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(240,240,240,.45);flex-wrap:wrap;}
+.breadcrumb a{color:rgba(240,240,240,.45);text-decoration:none;cursor:none;transition:color .2s;}
+.breadcrumb a:hover{color:#f0f0f0;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:#0d0d0d;}::-webkit-scrollbar-thumb{background:#1f1f1f;border-radius:2px;}
+.s-footer{background:#161616;border-top:1px solid rgba(255,255,255,.08);padding:48px 80px 28px;}
+.s-footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;padding-bottom:36px;border-bottom:1px solid rgba(255,255,255,.08);}
+.s-footer-logo{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:4px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:10px;display:block;text-decoration:none;}
+.s-footer-tagline{font-size:14px;color:rgba(240,240,240,.45);line-height:1.7;max-width:260px;}
+.s-footer-col-h{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#f5951a;margin-bottom:14px;}
+.s-footer-links{list-style:none;}
+.s-footer-links li{margin-bottom:8px;}
+.s-footer-links a{font-size:14px;color:rgba(240,240,240,.45);text-decoration:none;cursor:none;transition:color .2s;}
+.s-footer-links a:hover{color:#f0f0f0;}
+.s-footer-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:20px;}
+.s-footer-copy{font-size:13px;color:rgba(240,240,240,.25);}
+@media(max-width:1024px){.s-nav{padding:0 20px;}.s-nav-links{display:none;}.s-footer{padding:36px 24px 24px;}.s-footer-grid{grid-template-columns:1fr 1fr;gap:24px;}}
+@media(max-width:640px){.s-footer-grid{grid-template-columns:1fr;}}
+
+body{overflow:hidden;}
+.ml{display:grid;grid-template-columns:300px 1fr;height:100vh;padding-top:68px;}
+.sl{background:#161616;border-right:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;overflow:hidden;}
+.sl-top{padding:16px 14px 12px;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0;}
+.sl-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:#f0f0f0;margin-bottom:10px;}
+.srch{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:8px 12px;display:flex;align-items:center;gap:8px;transition:border-color .2s;}
+.srch:focus-within{border-color:rgba(245,149,26,.4);}
+.srch input{background:transparent;border:none;outline:none;font-family:'Barlow',sans-serif;font-size:14px;color:#f0f0f0;flex:1;cursor:none;}
+.srch input::placeholder{color:rgba(240,240,240,.3);}
+.conv-list{flex:1;overflow-y:auto;}
+.conv-row{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:none;transition:background .15s;border-bottom:1px solid rgba(255,255,255,.03);position:relative;}
+.conv-row:hover{background:rgba(255,255,255,.03);}
+.conv-row.active{background:rgba(245,149,26,.07);}
+.conv-row.active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:#f5951a;border-radius:0 2px 2px 0;}
+.conv-info{flex:1;min-width:0;}
+.conv-name{font-weight:600;font-size:13px;color:#f0f0f0;display:flex;justify-content:space-between;}
+.conv-preview{font-size:12px;color:rgba(240,240,240,.45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+.conv-time{font-size:10px;color:rgba(240,240,240,.3);flex-shrink:0;margin-left:4px;}
+.conv-dot{width:8px;height:8px;border-radius:50%;background:#f5951a;flex-shrink:0;}
+.conv-empty{padding:32px 14px;text-align:center;color:rgba(240,240,240,.45);font-size:13px;line-height:1.7;}
+.ca{display:flex;flex-direction:column;background:#0d0d0d;min-height:0;}
+.ca-empty{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:rgba(240,240,240,.45);}
+.ch{padding:12px 20px;border-bottom:1px solid rgba(255,255,255,.08);background:#161616;flex-shrink:0;display:flex;align-items:center;gap:12px;min-height:64px;}
+.ch-name{font-weight:600;font-size:15px;color:#f0f0f0;}
+.ch-sub{font-size:12px;color:rgba(240,240,240,.45);display:flex;align-items:center;gap:5px;margin-top:2px;}
+.msgs{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:9px;scroll-behavior:smooth;}
+.dsep{text-align:center;font-size:11px;color:rgba(240,240,240,.3);letter-spacing:1px;text-transform:uppercase;margin:4px 0;}
+.msg{display:flex;gap:8px;max-width:70%;}
+.msg.me{align-self:flex-end;flex-direction:row-reverse;}
+.mb{padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.55;word-break:break-word;color:#f0f0f0;}
+.msg.them .mb{background:#1e1e1e;border:1px solid rgba(255,255,255,.08);border-bottom-left-radius:4px;}
+.msg.me   .mb{background:linear-gradient(135deg,#f5951a,#ab2e2e);color:white;border-bottom-right-radius:4px;}
+.mts{font-size:10px;color:rgba(240,240,240,.3);margin-top:3px;display:flex;gap:3px;}
+.msg.me .mts{justify-content:flex-end;}
+.ci{padding:12px 20px;border-top:1px solid rgba(255,255,255,.08);background:#161616;flex-shrink:0;}
+.ir{display:flex;gap:10px;align-items:flex-end;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.08);border-radius:14px;padding:8px 8px 8px 16px;transition:border-color .2s;}
+.ir:focus-within{border-color:rgba(245,149,26,.5);background:rgba(245,149,26,.02);}
+.ir textarea{flex:1;background:transparent;border:none;outline:none;font-family:'Barlow',sans-serif;font-size:14px;color:#f0f0f0;resize:none;min-height:24px;max-height:120px;line-height:1.5;cursor:none;padding:3px 0;}
+.ir textarea::placeholder{color:rgba(240,240,240,.3);}
+.sbtn{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#f5951a,#ab2e2e);border:none;cursor:none;font-size:17px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.sbtn:hover{box-shadow:0 4px 16px rgba(245,149,26,.35);}
+.sbtn:active{transform:scale(.95);}
+.sbtn:disabled{opacity:.4;}
+.hint{font-size:11px;color:rgba(240,240,240,.25);text-align:center;margin-top:5px;}
+@media(max-width:700px){.ml{grid-template-columns:1fr;}body{overflow:auto;}}
+
+</style>
+</head>
+<body>
+<div id="sPageLoader" class="s-page-loader"><div class="logo">SPARR</div><div class="s-loader"></div></div>
+<div class="s-cursor" id="sCursor"></div>
+<div class="s-cursor-ring" id="sCursorRing"></div>
+<div class="s-toast-wrap" id="toastWrap"></div>
+<nav class="s-nav" id="mainNav" style="z-index:300">
+  <a class="s-logo" href="index.html">SPARR</a>
+  <div class="s-nav-links"><a href="index.html">Home</a><a href="profiles.html">Fighters</a><a href="messages.html" class="active">Zprávy</a><a href="my-profile.html">Profil</a></div>
+  <div class="s-nav-right" id="navRight"></div>
+</nav>
+<div class="ml">
+  <div class="sl">
+    <div class="sl-top">
+      <div class="sl-title">Zprávy</div>
+      <div class="srch"><span style="color:rgba(240,240,240,.3)">🔍</span><input type="text" id="srch" placeholder="Hledat…" oninput="filterList()"></div>
+    </div>
+    <button class="btn btn-ghost btn-sm" style="margin:10px 14px 6px" onclick="openModal('newModal')">+ Nová konverzace</button>
+    <div class="conv-list" id="convList"><div class="conv-empty"><div class="s-loader" style="margin:0 auto 12px"></div>Načítám…</div></div>
+  </div>
+  <div class="ca" id="chatArea">
+    <div class="ca-empty"><div style="font-size:52px;opacity:.2">💬</div><div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:rgba(240,240,240,.45)">Vyber konverzaci</div><div style="font-size:13px;color:rgba(240,240,240,.3)">nebo začni novou</div></div>
+  </div>
+</div>
+<div class="s-modal-overlay" id="newModal" onclick="if(event.target===this)closeModal('newModal')">
+  <div class="s-modal">
+    <div class="s-modal-head"><div class="s-modal-title">Nová zpráva</div><button class="s-modal-close" onclick="closeModal('newModal')">✕</button></div>
+    <div class="s-modal-body">
+      <div class="form-group"><label class="form-label">Hledat bojovníka</label><input type="text" class="form-input" id="fq" placeholder="Jméno, město, sport…" oninput="debSearch()"></div>
+      <div id="fres" style="display:flex;flex-direction:column;gap:8px;margin-top:10px;max-height:380px;overflow-y:auto"></div>
+    </div>
+  </div>
+</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail, updatePassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, query, where, orderBy, limit, updateDoc, arrayUnion, arrayRemove, deleteDoc, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+const _app = initializeApp({apiKey:"AIzaSyAhU5DPvVC88jeuQyKrA1jdyRsx3ub8wBY",authDomain:"sparr-ae946.firebaseapp.com",projectId:"sparr-ae946",storageBucket:"sparr-ae946.firebasestorage.app",messagingSenderId:"463453691804",appId:"1:463453691804:web:66854c39094693669f7259"});
+const auth = getAuth(_app);
+const db   = getFirestore(_app);
+const storage = getStorage(_app);
+const APP_URL = "https://jankebrle-star.github.io/SPARR_web_v5";
+// ── Helpers ──────────────────────────────────────────────
+function ini(n=""){return(n||"").trim().split(/\s+/).map(x=>x[0]||"").join("").slice(0,2).toUpperCase()||"?";}
+function esc(t=""){return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/\n/g,"<br>");}
+function ago(ts){if(!ts)return"—";const d=Date.now()-ts;if(d<60000)return"právě teď";if(d<3600000)return Math.floor(d/60000)+"m";if(d<86400000)return Math.floor(d/3600000)+"h";return Math.floor(d/86400000)+"d";}
+function getP(uid){return getDoc(doc(db,"fighters",uid)).then(s=>s.exists()?{id:s.id,...s.data()}:null).catch(()=>null);}
+function saveP(uid,d){return setDoc(doc(db,"fighters",uid),d,{merge:true});}
+function sendEmail(tpl,p){try{if(window.emailjs)window.emailjs.send("service_ytrykjs",tpl,p).catch(e=>console.warn("email:",e?.text||e));}catch{}}
+
+// ── UI init ───────────────────────────────────────────────
+function removePL(){const pl=document.getElementById("sPageLoader");if(pl){pl.style.opacity="0";setTimeout(()=>pl.remove(),500);}}
+if(document.readyState==="complete")removePL();else window.addEventListener("load",removePL);
+setTimeout(removePL,3000);
+
+window.addEventListener("load",()=>{if(window.emailjs)window.emailjs.init("HAijP0Nkt2ktswUcA");});
+
+window.showToast=function(msg,type){type=type||"info";var w=document.getElementById("toastWrap");if(!w)return;var ic={success:"✅",error:"❌",info:"ℹ️",warning:"⚠️"};var t=document.createElement("div");t.className="s-toast "+type;t.innerHTML="<span>"+ic[type]+"</span><span style=\"flex:1\">"+msg+"</span><button style=\"background:none;border:none;color:rgba(240,240,240,.4);cursor:none;font-size:16px;padding:0 4px;margin-left:6px\" onclick=\"this.parentElement.classList.remove('show');setTimeout(()=>this.parentElement.remove(),420)\">✕</button>";w.appendChild(t);requestAnimationFrame(()=>requestAnimationFrame(()=>t.classList.add("show")));setTimeout(()=>{t.classList.remove("show");setTimeout(()=>{if(t.parentElement)t.remove();},420);},5000);};
+
+window.openModal=id=>{const m=document.getElementById(id);if(m){m.classList.add("open");document.body.style.overflow="hidden";}};
+window.closeModal=id=>{const m=document.getElementById(id);if(m){m.classList.remove("open");document.body.style.overflow="";}};
+window.switchModal=(a,b)=>{closeModal(a);setTimeout(()=>openModal(b),300);};
+document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll(".s-modal-overlay.open").forEach(m=>m.classList.remove("open"));});
+
+const cur=document.getElementById("sCursor"),ring=document.getElementById("sCursorRing");
+if(cur&&ring){let mx=0,my=0,rx=0,ry=0;document.addEventListener("mousemove",e=>{mx=e.clientX;my=e.clientY;cur.style.transform=`translate(${mx}px,${my}px)`;});(function a(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.transform=`translate(${rx}px,${ry}px)`;requestAnimationFrame(a);})();}
+
+const nav=document.getElementById("mainNav");if(nav)window.addEventListener("scroll",()=>nav.classList.toggle("scrolled",scrollY>50));
+const ro=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add("visible");}),{threshold:.08});
+document.querySelectorAll(".reveal").forEach(el=>ro.observe(el));
+// ── Auth nav ──────────────────────────────────────────────
+function buildNav(user, profile) {
+  const right = document.getElementById("navRight");
+  if (!right) return;
+  if (user) {
+    const av = profile?.photoURL ? `<img src="${profile.photoURL}" alt="">` : ini(profile?.name||"?");
+    right.innerHTML = `<a href="messages.html" class="btn btn-outline btn-sm">💬 Zprávy</a><a href="my-profile.html" class="nav-user-avatar">${av}</a><button class="btn btn-outline btn-sm" id="_lob">Odhlásit</button>`;
+    document.getElementById("_lob").addEventListener("click", ()=>signOut(auth).then(()=>location.href="index.html"));
+  } else {
+    right.innerHTML = `<button class="btn btn-ghost btn-sm" onclick="openModal('loginModal')">Log In</button><button class="btn btn-fire btn-sm" onclick="openModal('registerModal')">Join SPARR</button>`;
+  }
+}
+
+let _u=null, _p=null, _chats=[], _active=null, _unsubMsgs=null, _unsubChats=null;
+
+onAuthStateChanged(auth, async user=>{
+  if(!user){location.href='index.html';return;}
+  _u=user; _p=await getP(user.uid);
+  buildNav(user,_p);
+  // Real-time listener na seznam konverzací — aktualizuje sidebar automaticky
+  _unsubChats=onSnapshot(
+    query(collection(db,'chats'),where('participants','array-contains',user.uid)),
+    snap=>{
+      _chats=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.lastMessageTs||0)-(a.lastMessageTs||0));
+      renderList(_chats);
+    },
+    err=>console.warn('chats:',err)
+  );
+  const sp=new URLSearchParams(location.search);
+  if(sp.get('uid')&&sp.get('name'))setTimeout(()=>openChat(sp.get('uid'),decodeURIComponent(sp.get('name')),null),600);
+});
+
+function renderList(chats){
+  const list=document.getElementById('convList');
+  const q=(document.getElementById('srch').value||'').toLowerCase();
+  const data=q?chats.filter(c=>{const ou=c.participants?.find(u=>u!==_u.uid)||'';return(c.participantNames?.[ou]||'').toLowerCase().includes(q);}):chats;
+  if(!data.length){list.innerHTML=`<div class="conv-empty">${q?'Nenalezeno':'Žádné konverzace.<br>Začni novou konverzací.'}</div>`;return;}
+  list.innerHTML=data.map(c=>{
+    const ou=c.participants?.find(u=>u!==_u.uid)||'';
+    const name=c.participantNames?.[ou]||'Fighter';
+    const unrd=c[`unread_${_u.uid}`];
+    const actv=_active?.uid===ou;
+    return `<div class="conv-row ${actv?'active':''}" data-uid="${ou}" onclick="openChat('${ou}','${esc(name)}','${c.id}')">
+      <div class="s-avatar s-avatar-md">${ini(name)}</div>
+      <div class="conv-info"><div class="conv-name"><span>${esc(name)}</span><span class="conv-time">${c.lastMessageTs?ago(c.lastMessageTs):''}</span></div><div class="conv-preview">${esc((c.lastMessage||'Začněte konverzaci').slice(0,45))}</div></div>
+      ${unrd?'<div class="conv-dot"></div>':''}
+    </div>`;
+  }).join('');
+}
+window.filterList=()=>renderList(_chats);
+
+window.openChat=function(uid,name,chatId){
+  if(!_u)return;
+  if(_unsubMsgs){_unsubMsgs();_unsubMsgs=null;}
+  _active={uid,name,chatId};
+  const cid=chatId||[_u.uid,uid].sort().join('_');
+  // mark read
+  updateDoc(doc(db,'chats',cid),{[`unread_${_u.uid}`]:false}).catch(()=>{});
+  // update active state
+  document.querySelectorAll('.conv-row').forEach(r=>r.classList.toggle('active',r.dataset.uid===uid));
+  // render chat
+  document.getElementById('chatArea').innerHTML=`
+    <div class="ch"><div class="s-avatar s-avatar-md">${ini(name)}</div><div style="flex:1"><div class="ch-name">${esc(name)}</div><div class="ch-sub"><span class="status-dot online"></span>Online</div></div><div style="margin-left:auto;display:flex;gap:8px"><a href="profile.html?uid=${uid}" class="btn btn-ghost btn-sm">Profil</a></div></div>
+    <div class="msgs" id="msgs"><div style="flex:1;display:flex;align-items:center;justify-content:center"><div class="s-loader"></div></div></div>
+    <div class="ci"><div class="ir"><textarea id="ta" placeholder="Napiš zprávu… (Enter = odeslat)" rows="1" oninput="autoH(this)" onkeydown="onKey(event)"></textarea><button class="sbtn" id="sndBtn">➤</button></div><div class="hint">Enter = odeslat · Shift+Enter = nový řádek</div></div>`;
+  document.getElementById('sndBtn').addEventListener('click',doSend);
+  // Real-time zprávy
+  const chatId2=[_u.uid,uid].sort().join('_');
+  _unsubMsgs=onSnapshot(
+    query(collection(db,'chats',chatId2,'messages'),orderBy('ts','asc')),
+    snap=>renderMsgs(snap.docs.map(d=>({id:d.id,...d.data()}))),
+    err=>console.warn('msgs:',err)
+  );
+  closeModal('newModal');
+};
+
+function renderMsgs(msgs){
+  const box=document.getElementById('msgs');if(!box)return;
+  const atBot=box.scrollHeight-box.scrollTop-box.clientHeight<100;
+  if(!msgs.length){box.innerHTML='<div style="flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:rgba(240,240,240,.3)"><div style="font-size:36px">👋</div><div style="font-size:13px">Napiš první zprávu!</div></div>';return;}
+  let lastD='';
+  box.innerHTML=msgs.map(m=>{
+    const me=m.fromUid===_u.uid;
+    const d=new Date(m.ts||Date.now());
+    const ds=d.toLocaleDateString('cs-CZ',{weekday:'short',month:'short',day:'numeric'});
+    const ts=d.toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'});
+    let sep='';if(ds!==lastD){sep=`<div class="dsep">${ds}</div>`;lastD=ds;}
+    return `${sep}<div class="msg ${me?'me':'them'}">${!me?`<div class="s-avatar s-avatar-sm">${ini(m.fromName)}</div>`:''}<div><div class="mb">${esc(m.text)}</div><div class="mts">${ts}${me?' <span style="opacity:.5">✓</span>':''}</div></div></div>`;
+  }).join('');
+  if(atBot||msgs.length<=15)box.scrollTop=box.scrollHeight;
+}
+
+async function doSend(){
+  if(!_active||!_u)return;
+  const ta=document.getElementById('ta');if(!ta)return;
+  const txt=ta.value.trim();if(!txt)return;
+  const btn=document.getElementById('sndBtn');
+  btn.disabled=true;ta.value='';ta.style.height='';
+  try{
+    const chatId=[_u.uid,_active.uid].sort().join('_');
+    // 1. Ulož zprávu
+    await addDoc(collection(db,'chats',chatId,'messages'),{fromUid:_u.uid,fromName:_p?.name||'Fighter',text:txt,ts:Date.now()});
+    // 2. Aktualizuj chat metadata (bez orderBy — žádný composite index)
+    await setDoc(doc(db,'chats',chatId),{participants:[_u.uid,_active.uid],participantNames:{[_u.uid]:_p?.name||'Fighter',[_active.uid]:_active.name},lastMessage:txt.slice(0,60),lastMessageTs:Date.now(),[`unread_${_active.uid}`]:true},{merge:true});
+    // 3. Notifikace pro příjemce (noncritical)
+    const tp=await getP(_active.uid).catch(()=>null);
+    updateDoc(doc(db,'fighters',_active.uid),{notifications:arrayUnion({type:'message',fromUid:_u.uid,fromName:_p?.name||'Fighter',text:`${_p?.name}: ${txt.slice(0,50)}`,link:`messages.html?uid=${_u.uid}&name=${encodeURIComponent(_p?.name||'')}`,ts:Date.now(),read:false,id:`${Date.now()}`})}).catch(()=>{});
+    // 4. Email (noncritical)
+    if(tp?.email)sendEmail('template_message',{to_name:_active.name,to_email:tp.email,from_name:_p?.name||'Fighter',preview:txt.slice(0,100),app_url:APP_URL});
+  }catch(e){showToast('Odeslání selhalo: '+e.message,'error');ta.value=txt;console.error(e);}
+  btn.disabled=false;ta.focus();
+}
+
+window.onKey=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();doSend();}};
+window.autoH=el=>{el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';};
+
+let _st;
+window.debSearch=()=>{clearTimeout(_st);_st=setTimeout(doSearch,380);};
+async function doSearch(){
+  const q=(document.getElementById('fq').value||'').trim().toLowerCase();
+  const box=document.getElementById('fres');
+  if(q.length<2){box.innerHTML='';return;}
+  box.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:8px;color:rgba(240,240,240,.45);font-size:13px"><div class="s-loader s-loader-sm"></div>Hledám…</div>';
+  try{
+    const s=await getDocs(query(collection(db,'fighters'),orderBy('points','desc'),limit(50)));
+    const all=s.docs.map(d=>({id:d.id,...d.data()}));
+    const hit=all.filter(f=>f.id!==_u.uid&&(f.name?.toLowerCase().includes(q)||f.city?.toLowerCase().includes(q)||f.sport?.toLowerCase().includes(q))).slice(0,8);
+    if(!hit.length){box.innerHTML='<div style="padding:14px;text-align:center;color:rgba(240,240,240,.45);font-size:13px">Nenalezeno</div>';return;}
+    box.innerHTML=hit.map(f=>`<div class="conv-row" style="border-radius:10px;border:1px solid rgba(255,255,255,.08)" onclick="openChat('${f.id}','${esc(f.name)}',null)">
+      <div class="s-avatar s-avatar-md">${f.photoURL?`<img src="${f.photoURL}" alt="">`:ini(f.name)}</div>
+      <div class="conv-info"><div class="conv-name"><span>${esc(f.name)}</span></div><div class="conv-preview">${esc(f.sport||'—')} · ${esc(f.city||'—')}</div></div>
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#f5951a;flex-shrink:0">Napsat →</span>
+    </div>`).join('');
+  }catch(e){box.innerHTML=`<div style="padding:14px;color:#ef4444;font-size:13px">Chyba: ${e.message}</div>`;}
+}
+</script>
+</body></html>
